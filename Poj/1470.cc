@@ -59,11 +59,11 @@ int main () {
             father[i] = i;
             son[i].clear();
             q[i].clear();
-            memset(Rank, 1, sizeof(Rank));
-            memset(visited, 0, sizeof(visited));
-            memset(ancestor, 0, sizeof(ancestor));
-            memset(res, 0, sizeof(res));
         }
+        memset(Rank, 1, sizeof(Rank));
+        memset(visited, 0, sizeof(visited));
+        memset(ancestor, 0, sizeof(ancestor));
+        memset(res, 0, sizeof(res));
         for (i = 1; i <= n; ++i) {
             int sonCnt;
             scanf("%d:(%d)", &u, &sonCnt);
