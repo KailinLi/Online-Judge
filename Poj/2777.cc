@@ -3,9 +3,9 @@
 #include <cstring>
 
 using namespace std;
-const int MAXN = 100000 + 10;
-int color[MAXN << 2];
-int lazy[MAXN << 2];
+const int MAXN = 131072 + 10;
+int color[MAXN << 1];
+int lazy[MAXN << 1];
 inline void pushUp(int root) {
     color[root] = color[root << 1] | color[root << 1 | 1];
 }
@@ -45,7 +45,7 @@ void updateTree(int L, int R, int delta, int l, int r, int root) {
 int queryTree(int L, int R, int l, int r, int root) {
     if (r < L || l > R)
         return 0;
-    else if (r <= R && l >= L) {
+    else if (r <= R && l >= L ) {
         return color[root];
     }
     pushDown(root);
