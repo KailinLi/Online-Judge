@@ -1,9 +1,10 @@
 #include <iostream>
 #include <cstdio>
 #include <cstring>
-
+#include <algorithm>
 using namespace std;
 const int MAXN = 50000 + 5;
+const int MAXV = 16;
 int father[MAXN];
 int Rank[MAXN];
 int visited[MAXN];
@@ -60,8 +61,41 @@ void setUnion(int u, int v) {
 
 int res[MAXN];
 int cost[MAXN];
-int pathCost[MAXN];
+int depth[MAXN];
+int dpMax[MAXV][MAXN];
+int dpMin[MAXV][MAXN];
+int dpUp[MAXV][MAXN];
+int dpDown[MAXV][MAXN];
+int parent[MAXV][MAXN];
 
+int Up(int u, int k, int &minPrice) {
+    minPrice = 0x3f3f3f3f;
+    int maxProfit = 0;
+    int prevMinPrice = 0x3f3f3f3f;
+    for (int i = MAXV - 1; i >= 0; --i) {
+        if (k >> i & 1) {
+            minPrice = min(minPrice, dpMin[i][u]);
+            maxProfit = max(maxProfit, max(dpUp[i][u], dpMax[i][u] - prevMinPrice));
+            prevMinPrice = min(prevMinPrice, dpMin[i][u]);
+            u = parent[i][u];
+        }
+    }
+    return maxProfit;
+}
+int Down(int u, int k, int &maxPrice) {
+    maxPrice = 0;
+    int maxProfit = 0;
+    int prevMaxPrice = 0;
+    for (int i = MAXV - 1; i >= 0; --i) {
+        if (k >> i & 1) {
+            maxPrice = max(maxPrice, dpMax[i][u]);
+            maxProfit = max(maxProfit, max(dpDown[i][u], prevMaxPrice - dpMin[i][u]));
+            prevMaxPrice = max(prevMaxPrice, dpMax[i][u]);
+            u = parent[i][u];
+        }
+    }
+    return maxProfit;
+}
 void LCA(int u, int father) {
     ancestor[u] = u;
     for (int i = head[u]; i != 0; i = edge[i].next) {
@@ -77,21 +111,47 @@ void LCA(int u, int father) {
             int questionID = (i + 1) >> 1;
             int from = question[i].from;
             int to = (from == u) ? question[i].to : u;
-            res[questionID] = pathCost[to] - pathCost[from];
-            // printf("%d\n", ancestor[setFind(question[i].to)]);
+            int lca = ancestor[setFind(question[i].to)];
+            int maxPrice, minPrice;
+            int upProfit = Up(from, depth[from] - depth[lca], minPrice);
+            int downProfit = Down(to, depth[to] - depth[lca], maxPrice);
+            res[questionID] = max(max(upProfit, downProfit), maxPrice - minPrice);
         }
     }
 }
 
-void dfs(int u, int sumCost, int father) {
-    pathCost[u] = cost[u] - sumCost;
+void dfs(int u, int d, int father) {
+    parent[0][u] = father;
+    depth[u] = d;
+    dpUp[0][u] = max(cost[father] - cost[u], 0);
+    dpDown[0][u] = max(cost[u] - cost[father], 0);
+    dpMax[0][u] = max(cost[u], cost[father]);
+    dpMin[0][u] = min(cost[u], cost[father]);
     for (int i = head[u]; i != 0; i = edge[i].next) {
         if (edge[i].to == father)
             continue;
-        dfs(edge[i].to, cost[u] - pathCost[u], u);
+        dfs(edge[i].to, d + 1, u);
     }
 }
-
+void init(int u) {
+    memset(dpMax, 0, sizeof(dpMax));
+    memset(dpMin, 0x3f, sizeof(dpMin));
+    dfs(1, 0, -1);
+    for (int k = 0; k + 1 < MAXV; ++k) {
+        for (int v = 1; v < u + 1; ++v) {
+            if (parent[k][v] < 0)
+                parent[k + 1][v] = -1;
+            else {
+                parent[k + 1][v] = parent[k][parent[k][v]];
+                int t = parent[k][v];
+                dpMax[k + 1][v] = max(dpMax[k][v], dpMax[k][t]);
+                dpMin[k + 1][v] = min(dpMin[k][v], dpMin[k][t]);
+                dpUp[k + 1][v] = max(max(dpUp[k][v], dpUp[k][t]), dpMax[k][t] - dpMin[k][v]);
+                dpDown[k + 1][v] = max(max(dpDown[k][v], dpDown[k][t]), dpMax[k][v] - dpMin[k][t]);
+            }
+        }
+    }
+}
 int n;
 int w, u, v, q;
 int main () {
@@ -123,7 +183,7 @@ int main () {
             addQustion(u, v, u);
             addQustion(v, u, u);
         }
-        dfs(1, 0, -1);
+        init(n);
         LCA(1, -1);
         for (int i = 1; i <= q; ++i) {
             printf("%d\n", (res[i] < 0) ? 0 : res[i]);
