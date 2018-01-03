@@ -3,8 +3,8 @@
 #include <cstring>
 #include <algorithm>
 using namespace std;
-const int MAXN = 1000000 + 10;
-const int MAXM = 200000 + 10;
+const int MAXN = 10000 + 10;
+const int MAXM = 20000 + 10;
 const int INF = 0x3f3f3f3f;
 int q[MAXN];
 int h, t;
