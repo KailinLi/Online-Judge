@@ -44,6 +44,8 @@ int main () {
 	while (getline(cin, in) && getline(cin, post)) {
 		stringstream ss(in);
 		int tmp;
+		i_size = 0;
+		p_size = 0;
 		while (ss >> tmp)
 			inOrder[i_size++] = tmp;
 		ss = stringstream(post);
