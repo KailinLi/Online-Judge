@@ -1,65 +1,79 @@
 #include <iostream>
+#include <cstdio>
 #include <cstring>
-#include <vector>
-#include <climits>
-#include <queue>
 #include <algorithm>
+#include <queue>
+#define REP(i, n) for (int (i) = 0; (i) < (n); ++(i))
 using namespace std;
+const int INF = 0x3f3f3f3f;
 const int MAXN = 10000 + 5;
-vector<pair<int, int> > adj[MAXN];
-int p[MAXN];
-int d[MAXN];
-int visited[MAXN];
-struct Distance {
+const int MAXM = 100000 + 5;
+struct Node {
 	int u;
 	int d;
-	Distance(int u, int d): u(u), d(d) {}
+	bool operator< (const Node & rhs) const {
+		return d > rhs.d;
+	}
+	Node(int _u, int _d): u(_u), d(_d) {}
 };
-bool cmp(const Distance& lhs, const Distance& rhs) {
-	return lhs.d > rhs.d;
+int n, m;
+struct Edge {
+	int to;
+	int next;
+	int w;
+};
+Edge edge[MAXM << 1];
+int head[MAXN];
+int eCnt;
+void addEdge(int u, int v, int w) {
+	edge[++eCnt].to = v;
+	edge[eCnt].w = w;
+	edge[eCnt].next = head[u];
+	head[u] = eCnt;
 }
-int main()
-{
+int d[MAXN];
+int vis[MAXN];
+int pCost[MAXN];
+void dijkstra(int s) {
+	priority_queue<Node, vector<Node> >q;
+	REP(i, n + 1) d[i] = INF;
+	d[s] = 0;
+	q.push(Node(s, 0));
+	while (!q.empty()) {
+		Node p = q.top();
+		q.pop();
+		if (vis[p.u]) continue;
+		vis[p.u] = 1;
+		for (int e = head[p.u]; e != 0; e = edge[e].next) {
+			int cost = p.d + edge[e].w;
+			if (cost < d[edge[e].to]) {
+				d[edge[e].to] = cost;
+				pCost[edge[e].to] = edge[e].w;
+				q.push(Node(edge[e].to, d[edge[e].to]));
+			}
+			else if (cost == d[edge[e].to] && pCost[edge[e].to] > edge[e].w) {
+				pCost[edge[e].to] = edge[e].w;
+			}
+		}
+	}
+}
+int main () {
 	std::ios::sync_with_stdio(false);
 #ifdef LOCAL
 	freopen("input.txt", "r", stdin);
 #endif
-	int n, m;
-	cin >> n >> m;
+	scanf("%d %d", &n, &m);
+	int u, v, w;
 	while (m--) {
-		int u, v, d;
-		cin >> u >> v >> d;
-		adj[u].push_back(make_pair(v, d));
-		adj[v].push_back(make_pair(u, d));
+		scanf("%d %d %d", &u, &v, &w);
+		addEdge(u, v, w);
+		addEdge(v, u, w);
 	}
-	memset(d, 0x7f, sizeof(d));
-	priority_queue<Distance, vector<Distance>,
-				   bool (*)(const Distance &lhs, const Distance &rhs)>
-		q(cmp);
-	d[1] = 0;
-	q.push(Distance(1, 0));
-	while (!q.empty()) {
-		Distance current = q.top();
-		q.pop();
-		if(visited[current.u])
-			continue;
-		visited[current.u] = 1;
-		for (vector<pair<int, int> >::iterator i = adj[current.u].begin();
-				i != adj[current.u].end(); ++i) {
-			if (i->second + d[current.u] < d[i->first]) {
-				d[i->first] = i->second + d[current.u];
-				p[i->first] = i->second;
-				q.push(Distance(i->first, i->second + d[current.u]));
-			}
-			else if (i->second + d[current.u] == d[i->first]) {
-				p[i->first] = min(i->second, p[i->first]);
-			}
-		}
-	}
+	dijkstra(1);
 	int res = 0;
-	for (int i = 1; i <= n; ++i) {
-		// cout << p[i] << endl;
-		res += p[i];
+	REP(i, n) {
+		res += pCost[i + 1];
 	}
-	cout << res << endl;
+	printf("%d\n", res);
+	return 0;
 }
