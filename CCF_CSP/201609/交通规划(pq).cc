@@ -3,6 +3,7 @@
 #include <cstring>
 #include <algorithm>
 #include <queue>
+#include <functional>
 
 #define REP(i, n) for (int (i) = 0; (i) < (n); ++(i))
 using namespace std;
@@ -26,10 +27,21 @@ void add_edge(int u, int v, int w) {
 struct Node {
     int u;
     int d;
-    bool operator< (const Node &rhs) const {
-        return d > rhs.d;
-    }
+    // bool operator< (const Node &rhs) const {
+    //     return d > rhs.d;
+    // }
     Node(int u, int d): u(u), d(d) {}
+};
+// bool operator< (const Node &lhs, const Node &rhs) {
+//     return lhs.d > rhs.d;
+// }
+bool cmp (const Node &lhs, const Node &rhs) {
+    return lhs.d > rhs.d;
+}
+struct Cmp {
+    bool operator() (const Node &lhs, const Node &rhs) {
+        return lhs.d > rhs.d;
+    }
 };
 int d[MAXN];
 int vis[MAXN];
@@ -38,7 +50,11 @@ int n, m;
 int u, v, w;
 int res;
 void dijkstra() {
-    priority_queue<Node, vector<Node> > q;
+    // priority_queue<Node, vector<Node>, Cmp> q;
+    // priority_queue<Node, vector<Node>, bool(*)(const Node &, const Node &)> q([](const Node &lhs, const Node &rhs) {
+    //     return lhs.d > rhs.d;
+    // });
+    priority_queue<Node, vector<Node>, bool(*)(const Node &, const Node &)> q(cmp);
     REP(i, n + 1) d[i] = INF;
     d[1] = 0;
     q.push(Node(1, 0));
