@@ -64,11 +64,11 @@ int main (void) {
         }
         if (borrow[i].t == INF && render[j].t == INF) break;
     }
-    int flg = 0;
+    int first = 1;
     REP(i, n) {
-        if (flg) printf(" ");
+        if (first) first = 0;
+        else printf(" ");
         printf("%d", idx[i]);
-        flg = 1;
     }
     printf("\n");
     return 0;
