@@ -27,38 +27,25 @@ int main (void) {
                 scanf("%c", &c);
                 switch (c)
                 {
-                    case 'A':
-                        ++DNA[0][j];
-                        break;
-                    case 'C':
-                        ++DNA[1][j];
-                        break;
-                    case 'G':
-                        ++DNA[2][j];
-                        break;
-                    default:
-                        ++DNA[3][j];
-                        break;
+                    case 'A': ++DNA[0][j]; break;
+                    case 'C': ++DNA[1][j]; break;
+                    case 'G': ++DNA[2][j]; break;
+                    default: ++DNA[3][j]; break;
                 }
             }
         }
         REP(i, n) {
-            if (DNA[0][i] >= DNA[1][i] && DNA[0][i] >= DNA[2][i] && DNA[0][i] >= DNA[3][i]) {
-                printf("A");
-                res += m - DNA[0][i];
+            int max_i = 0;
+            REP(j, 4) {
+                if (DNA[j][i] > DNA[max_i][i]) max_i = j;
             }
-            else if (DNA[1][i] >= DNA[0][i] && DNA[1][i] >= DNA[2][i] && DNA[1][i] >= DNA[3][i]) {
-                printf("C");
-                res += m - DNA[1][i];
+            switch (max_i) {
+                case 0: printf("A"); break;
+                case 1: printf("C"); break;
+                case 2: printf("G"); break;
+                default: printf("T"); break;
             }
-            else if (DNA[2][i] >= DNA[0][i] && DNA[2][i] >= DNA[1][i] && DNA[2][i] >= DNA[3][i]) {
-                printf("G");
-                res += m - DNA[2][i];
-            }
-            else {
-                printf("T");
-                res += m - DNA[3][i];
-            }
+            res += m - DNA[max_i][i];
         }
         printf("\n%d\n", res);
     }
