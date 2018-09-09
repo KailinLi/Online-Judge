@@ -115,8 +115,8 @@ int main (void) {
             }
             while (!stack.empty()) {
                 int u = stack.pop();
+                if (!vis[u]) q.push(u);
                 vis[u] = 1;
-                q.push(u);
             }
             if (min_c != INF) ans.push(min_c);
         }
