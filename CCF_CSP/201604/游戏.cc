@@ -2,69 +2,58 @@
 #include <cstdio>
 #include <cstring>
 #include <algorithm>
+#include <queue>
 
 #define REP(i, n) for (int (i) = 0; (i) < (n); ++(i))
 using namespace std;
-const int INF = 0x3f3f3f3f;
-const int MAXN = 100 + 5;
-int n, m;
-int c;
-int x, y, a, b;
-int btime[MAXN][MAXN];
-int etime[MAXN][MAXN];
-int dx[] = {1, 0, -1, 0};
-int dy[] = {0, 1, 0, -1};
-int queue[2][MAXN * MAXN];
-int head, tail;
-void enq(int x, int y) {
-    queue[0][tail] = x;
-    queue[1][tail] = y;
-    tail = (tail + 1) % (MAXN * MAXN);
-}
-int deq() {
-    int ret = head;
-    head = (head + 1) % (MAXN * MAXN);
-    return ret;
-}
-int q_size() {
-    if (tail > head) return tail - head;
-    else return tail - head + (MAXN * MAXN);
-}
+// const int INF = 0x3f3f3f3f;
+const int MAXN = 100 + 10;
+struct State {
+    int x;
+    int y;
+    int t;
+    State(int _x, int _y, int _t): x(_x), y(_y), t(_t) {}
+};
+int danger[2][MAXN * MAXN];
+int m, n, t;
+int r, c, a, b;
+int delta[4][2] = {
+    {1, 0},
+    {-1, 0},
+    {0, 1},
+    {0, -1}
+};
+int vis[MAXN][MAXN];
+
 int main (void) {
     // std::ios::sync_with_stdio(false);
 #ifdef LOCAL
     freopen("input.txt", "r", stdin);
 #endif
-    scanf("%d %d %d", &n, &m, &c);
-    while (c--) {
-        scanf("%d %d %d %d", &x, &y, &a, &b);
-        btime[x - 1][y - 1] = a;
-        etime[x - 1][y - 1] = b;
+    scanf("%d %d %d", &n, &m, &t);
+    while (t--) {
+        scanf("%d %d %d %d", &r, &c, &a, &b);
+        danger[0][r * m + c] = a;
+        danger[1][r * m + c] = b;
     }
-    enq(0, 0);
-    int res = 0;
-    int flg = 1;
-    while (q_size() && flg) {
-        int cnt = q_size();
-        for (int i = 0; i < cnt; ++i) {
-            int p = deq();
-            x = queue[0][p];
-            y = queue[1][p];
-            if (x == n - 1 && y == m - 1) {
-                flg = 0;
-                --res;
-                break;
-            }
-            REP(k, 4) {
-                x = queue[0][p] + dx[k];
-                y = queue[1][p] + dy[k];
-                if (x < 0 || x > n || y < 0 || y > m) continue;
-                if (btime[x][y] <= res + 1 && etime[x][y] >= res + 1) continue;
-                enq(x, y);
-            }
+    queue<State> q;
+    q.push(State(1, 1, 1));
+    vis[1][1] = 1;
+    while (!q.empty()) {
+        State cur = q.front(); q.pop();
+        if (cur.x == n && cur.y == m) {
+            printf("%d\n", cur.t - 1);
+            return 0;
         }
-        ++res;
+        REP(i, 4) {
+            int n_x = cur.x + delta[i][0];
+            int n_y = cur.y + delta[i][1];
+            if (n_x > n || n_y > m || n_x <= 0 || n_y <= 0) continue;
+            if (cur.t >= danger[0][n_x * m + n_y] && cur.t <= danger[1][n_x * m + n_y]) continue;
+            if (vis[n_x][n_y] == cur.t + 1) continue;
+            vis[n_x][n_y] = cur.t + 1;
+            q.push(State(n_x, n_y, cur.t + 1));
+        }
     }
-    printf("%d\n", res);
     return 0;
 }
